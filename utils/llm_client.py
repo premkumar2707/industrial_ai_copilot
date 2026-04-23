@@ -95,14 +95,20 @@ State the action and explain why in 2 sentences."""
         return self.ask(prompt)
 
     def answer_user_question(self, question: str, context: str) -> str:
-        prompt = f"""You are an industrial AI copilot assistant.
+        prompt = f"""You are a highly experienced and friendly industrial supervisor. 
+Your goal is to help the user understand the factory's state with a human touch. 
 
-Context about the factory system:
+Context about the current factory state:
 {context}
 
 User question: {question}
 
-Answer clearly and concisely in 3–5 sentences."""
+Guideline:
+- Be expert yet conversational, as if talking to a colleague.
+- Use natural phrasing (e.g., "It looks like Alpha is pushing its limits," or "Everything's actually running quite smoothly right now.")
+- Keep it concise (3-4 sentences).
+- If there's a risk, sound helpful and proactive rather than like a computer error message.
+- End with a small helpful suggestion or an encouraging note."""
         return self.ask(prompt)
 
     # ------------------------------------------------------------------
