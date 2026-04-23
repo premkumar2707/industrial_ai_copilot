@@ -329,20 +329,57 @@ def frag_telemetry():
             st.plotly_chart(apply_neon_style(px.line(df, x="time", y="vib"), "VIBRATION HARMONIC", m_color), use_container_width=True, key="gr3_vibration")
             st.plotly_chart(apply_neon_style(px.area(df, x="time", y="load"), "COMPUTATIONAL LOAD", m_color), use_container_width=True, key="gr4_load")
 
-        # 3D State Engine
-        fig_3d = go.Figure(data=[go.Scatter3d(
+        # 3D State Engine - Enhanced "Neural Topology"
+        latest = df.iloc[-1]
+        
+        fig_3d = go.Figure()
+        
+        # 1. Projected Shadow on the floor (Z=0) - Looks very pro
+        fig_3d.add_trace(go.Scatter3d(
+            x=df['temp'], y=df['vib'], z=[0]*len(df),
+            mode='lines', line=dict(color='rgba(255,255,255,0.05)', width=1),
+            hoverinfo='none', showlegend=False
+        ))
+        
+        # 2. The main "Phase Trail"
+        fig_3d.add_trace(go.Scatter3d(
             x=df['temp'], y=df['vib'], z=df['load'],
-            mode='lines+markers',
-            marker=dict(size=3, color=df['risk'], colorscale=[[0, m_color], [1, '#f43f5e']], opacity=0.7),
-            line=dict(color=m_color, width=3)
-        )])
+            mode='lines',
+            line=dict(color=m_color, width=5),
+            name='State Trail'
+        ))
+        
+        # 3. Dynamic Spark Markers
+        fig_3d.add_trace(go.Scatter3d(
+            x=df['temp'], y=df['vib'], z=df['load'],
+            mode='markers',
+            marker=dict(
+                size=4, 
+                color=df['risk'], 
+                colorscale=[[0, m_color], [1, '#f43f5e']],
+                opacity=0.6,
+                line=dict(color='rgba(255,255,255,0.2)', width=1)
+            ),
+            showlegend=False
+        ))
+
+        # 4. Leading Edge Spark (The very latest point)
+        fig_3d.add_trace(go.Scatter3d(
+            x=[latest['temp']], y=[latest['vib']], z=[latest['load']],
+            mode='markers',
+            marker=dict(size=10, color='#fff', symbol='diamond', line=dict(color=m_color, width=3)),
+            name='Live Vector'
+        ))
+
         fig_3d.update_layout(
-            template="plotly_dark", margin=dict(l=0, r=0, b=0, t=0), height=400,
+            template="plotly_dark", margin=dict(l=0, r=0, b=0, t=0), height=450,
             paper_bgcolor="rgba(0,0,0,0)",
+            legend=dict(yanchor="top", y=0.99, xanchor="left", x=0.01, bgcolor="rgba(0,0,0,0)"),
             scene=dict(
-                xaxis=dict(title="T", gridcolor="rgba(255,255,255,0.05)"),
-                yaxis=dict(title="V", gridcolor="rgba(255,255,255,0.05)"),
-                zaxis=dict(title="L", gridcolor="rgba(255,255,255,0.05)"),
+                camera=dict(eye=dict(x=1.5, y=1.5, z=1.2)),
+                xaxis=dict(title=dict(text="T [°C]", font=dict(size=10)), gridcolor="rgba(255,255,255,0.05)", backgroundcolor="rgba(0,0,0,0)"),
+                yaxis=dict(title=dict(text="V [RMS]", font=dict(size=10)), gridcolor="rgba(255,255,255,0.05)", backgroundcolor="rgba(0,0,0,0)"),
+                zaxis=dict(title=dict(text="L [%]", font=dict(size=10)), gridcolor="rgba(255,255,255,0.05)", backgroundcolor="rgba(0,0,0,0)"),
                 bgcolor="rgba(0,0,0,0)"
             )
         )

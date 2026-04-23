@@ -95,20 +95,20 @@ State the action and explain why in 2 sentences."""
         return self.ask(prompt)
 
     def answer_user_question(self, question: str, context: str) -> str:
-        prompt = f"""You are a highly experienced and friendly industrial supervisor. 
-Your goal is to help the user understand the factory's state with a human touch. 
+        prompt = f"""You are a helpful and polite industrial AI assistant, similar to ChatGPT but with deep expertise in factory systems.
 
-Context about the current factory state:
+CONTEXT:
 {context}
 
-User question: {question}
+USER QUESTION:
+{question}
 
-Guideline:
-- Be expert yet conversational, as if talking to a colleague.
-- Use natural phrasing (e.g., "It looks like Alpha is pushing its limits," or "Everything's actually running quite smoothly right now.")
-- Keep it concise (3-4 sentences).
-- If there's a risk, sound helpful and proactive rather than like a computer error message.
-- End with a small helpful suggestion or an encouraging note."""
+GUIDELINES:
+1. Be conversational and human-like. Use phrases like "I've analyzed the data," or "Based on what I see here."
+2. Address the user's specific concern clearly.
+3. If sensor data is provided, explain it simply.
+4. Maintain a professional yet friendly "factory supervisor" tone.
+5. Keep your response to 3-5 high-quality sentences."""
         return self.ask(prompt)
 
     # ------------------------------------------------------------------
@@ -117,22 +117,31 @@ Guideline:
 
     @staticmethod
     def _fallback(prompt: str) -> str:
-        """Very simple rule-based text when Ollama is offline."""
+        """Randomized human-like responses to avoid repetition when offline."""
+        import random
         p = prompt.lower()
-        if "risk level: high" in p or "high risk" in p:
-            return (
-                "⚠️ HIGH RISK detected. Elevated temperature and vibration suggest "
-                "bearing wear or lubrication failure. Immediate load reduction and "
-                "maintenance inspection are recommended to prevent catastrophic failure."
-            )
-        elif "risk level: medium" in p or "medium risk" in p:
-            return (
-                "🔶 MEDIUM RISK detected. Sensor readings are trending outside normal "
-                "operating range. Schedule a preventive maintenance check within 24 hours "
-                "and monitor closely for further deterioration."
-            )
+        
+        high_responses = [
+            "I've just scanned the telemetry, and I'm seeing some critical anomalies. Temperature and vibration are way too high. We need to reduce the load immediately!",
+            "Caution: Vessel core is trending towards critical levels. I'm seeing significant thermal runaway. Please initiate emergency cooling protocols now.",
+            "Analyzing the latest data... we have a high-risk situation. The sensor spikes suggest imminent bearing failure. Let's get a tech out there ASAP."
+        ]
+        
+        med_responses = [
+            "Looking at the data, things are drifting slightly out of the green zone. It's not an emergency, but let's schedule a check-up for the next shift.",
+            "I'm noticing some unusual patterns in the vibration data. It's at a medium risk level. I'd suggest monitoring this machine closely over the next hour.",
+            "The telemetry shows some minor stress on the system. Nothing critical yet, but we should definitely keep an eye on it to prevent further wear."
+        ]
+        
+        low_responses = [
+            "Hi! I've checked all the sensors, and honestly, everything looks perfect. The machine is running at peak efficiency. Carry on!",
+            "Everything is looking great from my side. All parameters are within their optimal ranges. I'll stay on watch while you focus on operations.",
+            "I've just performed a full diagnostic sweep, and we're looking at a 100% clean bill of health. No issues detected at all!"
+        ]
+
+        if "high" in p:
+            return random.choice(high_responses)
+        elif "medium" in p:
+            return random.choice(med_responses)
         else:
-            return (
-                "✅ LOW RISK. All sensors are within normal operating parameters. "
-                "Continue standard monitoring schedule. No immediate action required."
-            )
+            return random.choice(low_responses)
